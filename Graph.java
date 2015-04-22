@@ -1,7 +1,9 @@
+import java.util.*;
+
 public class Graph {
 
 	////////////////////////////////////////////////////////////////////////////////
-	public class Person {
+	public static class Person {
 		String name;
 		String school;
 
@@ -17,9 +19,14 @@ public class Graph {
 			else
 				return false;
 		}
+
+		@Override
+		public String toString() {
+			return "(" + name + (school != null ? ", " + school : "") + ")";
+		}
 	}
 
-	public class PersonNode {
+	public static class PersonNode {
 		Person data;
 		PersonNode next;
 
@@ -29,7 +36,7 @@ public class Graph {
 		}
 	}
 
-	public class PersonNotFoundException extends Exception {
+	public static class PersonNotFoundException extends Exception {
 		public PersonNotFoundException(String s) {
 			super(s);
 		}
@@ -54,15 +61,15 @@ public class Graph {
 		mPersonNameIndex.put(person.name, person);
 	}
 
-	public void addEdge(Person p1, Person p2) {
+	public void addEdge(Person p1, Person p2) throws PersonNotFoundException {
 		if (!mPersonIndex.containsKey(p1)) {
-			throw PersonNotFoundException("Person \"" + p1.name + "\" that goes to \"" + p1.school + "\" not found.");
+			throw new PersonNotFoundException("Person \"" + p1.name + "\" that goes to \"" + p1.school + "\" not found.");
 		} else if (!mPersonIndex.containsKey(p2)) {
-			throw PersonNotFoundException("Person \"" + p2.name + "\" that goes to \"" + p2.school + "\" not found.");
+			throw new PersonNotFoundException("Person \"" + p2.name + "\" that goes to \"" + p2.school + "\" not found.");
 		}
 
-		mEdgeIndex.put(p1, new PersonNode(p2, (mEdgeIndex.containsKey(p1) ? mEdgeIndex.get(p1)) : null));
-		mEdgeIndex.put(p2, new PersonNode(p1, (mEdgeIndex.containsKey(p2) ? mEdgeIndex.get(p2)) : null));
+		mEdgeIndex.put(p1, new PersonNode(p2, (mEdgeIndex.containsKey(p1) ? mEdgeIndex.get(p1) : null)));
+		mEdgeIndex.put(p2, new PersonNode(p1, (mEdgeIndex.containsKey(p2) ? mEdgeIndex.get(p2) : null)));
 	}
 
 	public Person nameQuery(String name) {
@@ -71,5 +78,22 @@ public class Graph {
 		} else return null;
 	}
 
-	public List
+	public void printConnections() {
+		for (Person p : mEdgeIndex.keySet()) {
+			System.out.print(p.name);
+
+			PersonNode root = mEdgeIndex.get(p);
+			if (root != null) {
+				System.out.print(":\t( ");
+				while (root != null) {
+					System.out.print(root.data.toString());
+					if (root.next != null) System.out.print(" , ");
+					root = root.next;
+				}
+				System.out.print(" )");
+			}
+
+			System.out.println();
+		}
+	}
 }
