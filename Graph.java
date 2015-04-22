@@ -1,4 +1,6 @@
 public class Graph {
+
+	////////////////////////////////////////////////////////////////////////////////
 	public class Person {
 		String name;
 		String school;
@@ -32,6 +34,7 @@ public class Graph {
 			super(s);
 		}
 	}
+	////////////////////////////////////////////////////////////////////////////////
 
 	
 	private HashMap<Person,PersonNode> mEdgeIndex;
@@ -51,9 +54,22 @@ public class Graph {
 		mPersonNameIndex.put(person.name, person);
 	}
 
+	public void addEdge(Person p1, Person p2) {
+		if (!mPersonIndex.containsKey(p1)) {
+			throw PersonNotFoundException("Person \"" + p1.name + "\" that goes to \"" + p1.school + "\" not found.");
+		} else if (!mPersonIndex.containsKey(p2)) {
+			throw PersonNotFoundException("Person \"" + p2.name + "\" that goes to \"" + p2.school + "\" not found.");
+		}
+
+		mEdgeIndex.put(p1, new PersonNode(p2, (mEdgeIndex.containsKey(p1) ? mEdgeIndex.get(p1)) : null));
+		mEdgeIndex.put(p2, new PersonNode(p1, (mEdgeIndex.containsKey(p2) ? mEdgeIndex.get(p2)) : null));
+	}
+
 	public Person nameQuery(String name) {
 		if (mPersonNameIndex.containsKey(name)) {
 			return mPersonNameIndex.get(name);
 		} else return null;
 	}
+
+	public List
 }
