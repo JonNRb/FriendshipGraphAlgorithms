@@ -45,27 +45,28 @@ public class Graph {
 			super(s);
 		}
 		public PersonNotFoundException(Person p) {
-			if (p != null)
-				super("Person \"" + p.name + "\" that goes to \"" + p.school + "\" not found.");
-			else
-				super();
+			super("Person \"" + p.name + "\" that goes to \"" + p.school + "\" not found.");
 		}
 	}
 
-	private class MinHeap<S,T implements Comparable><{
-		private class HeapNode<S,T implements Comparable> {
+	public static class MinHeap<S,T extends Comparable<T>>{
+		public class HeapNode<S,T extends Comparable<T>> {
 			S data;
 			T weight;
 
-			public HeapNode<S,T>(S data, T weight) {
+			public HeapNode(S data, T weight) {
 				this.data = data;
 				this.weight = weight;
+			}
+
+			public String toString() {
+				return "(" + data.toString() + ", " + weight.toString() + ")";
 			}
 		}
 
 		private ArrayList<HeapNode<S,T>> heap;
 
-		public MinHeap<S,T>() {
+		public MinHeap() {
 			heap = new ArrayList<>();
 		}
 
@@ -73,22 +74,56 @@ public class Graph {
 			HeapNode newNode = new HeapNode(data, weight);
 			heap.add(newNode);
 
-			int pre = heap.size() - 1
-			int cur = (cur - 1)/2;
+			int pre = heap.size() - 1, cur = (pre - 1)/2;
 			HeapNode current = heap.get(cur);
-			while (cur > 0 && current.weight > newNode.weight) {
+			while (cur >= 0 && current.weight.compareTo(newNode.weight) > 0) {
 				heap.set(pre, current);
 				heap.set(cur, newNode);
 
 				pre = cur;
 				cur = (cur - 1)/2;
-				HeapNode current = heap.get(cur);
+				current = heap.get(cur);
 			}
 		}
 
-		public Pair<S,T> pop() {
-			Pair<S,T> retVal = new Pair<>(heap.get(0).data, heap.get(0).weight);
+		public HeapNode<S,T> pop() {
+			if (heap.size() == 0) return null;
+
+			HeapNode<S,T> retVal = heap.get(0);
 			
+			HeapNode last = heap.get(heap.size()-1);
+			heap.remove(heap.size()-1);
+			heap.set(0, last);
+
+			int pre = 0, cur = pre*2 + 1;
+			while ((cur < heap.size() && last.weight.compareTo(heap.get(cur).weight) > 0)
+					|| (cur + 1 < heap.size() && last.weight.compareTo(heap.get(cur+1).weight) > 0)) {
+				
+				int minChild;
+				if (cur + 1 >= heap.size()) minChild = cur;
+				else minChild = (heap.get(cur).weight.compareTo(heap.get(cur+1).weight) < 0 ? cur : cur+1);
+
+				heap.set(pre, heap.get(minChild));
+				heap.set(minChild, last);
+
+				pre = minChild;
+				cur = pre*2 + 1;
+			}
+
+
+			return retVal;
+		}
+
+		public void printHeap() {
+			int n = 1;
+			for (int i = 0; i < heap.size(); n *= 2) {
+				for (int j = 0; j < n && i + j < heap.size(); j++) {
+					System.out.print(heap.get(i+j).toString());
+					if (j+1 < n && i+j+1 < heap.size()) System.out.print(" , ");
+				}
+				i += n;
+				System.out.println();
+			}
 		}
 	}
 	////////////////////////////////////////////////////////////////////////////////
@@ -129,7 +164,7 @@ public class Graph {
 	}
 
 	List<Person> shortestPath(Person start, Person finish) throws PersonNotFoundException {
-		BSTN<Person,Integer> fringe = new BSTN<>();
+		//BSTN<Person,Integer> fringe = new BSTN<>();
 		HashMap<Person,Integer> distances = new HashMap<>();
 		HashMap<Person,Person> prevPerson = new HashMap<>();
 
@@ -139,12 +174,9 @@ public class Graph {
 		distances.put(start, 0);
 		for (PersonNode p = mEdgeIndex.get(start); p != null; p = p.next) {
 			distances.put(p.data, 1);
-			fringe.insertNode(p.data, 1);
+			//fringe.insertNode(p.data, 1);
 		}
-
-		while (!fringe.empty()) {
-
-		}
+		return null;
 	}
 
 	public void printConnections() {
