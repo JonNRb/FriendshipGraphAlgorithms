@@ -1,10 +1,11 @@
 package com.alexandjon.FriendshipGraphAlgorithms;
 
+import java.lang.*;
 import java.util.*;
 import java.io.*;
 
 
-class TestDriver {
+public class TestDriver {
 	public static void main(String[] argv) {
 		/*Graph g = new Graph();
 
@@ -52,7 +53,11 @@ class TestDriver {
 
 			Graph g = Friends.makeGraph(sc);
 			g.printConnections();
+
+			System.out.println(g.shortestPath(g.nameQuery("samir"), g.nameQuery("nick")));
 		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (Graph.PersonNotFoundException e) {
 			e.printStackTrace();
 		}
 	}

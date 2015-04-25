@@ -1,7 +1,8 @@
 package com.alexandjon.FriendshipGraphAlgorithms;
 
-import java.util.*;
 import java.lang.*;
+import java.util.*;
+import java.io.*;
 
 
 public class Graph {
@@ -36,6 +37,11 @@ public class Graph {
 		public PersonNode(Person data, PersonNode next) {
 			this.data = data;
 			this.next = next;
+		}
+
+		@Override
+		public String toString() {
+			return data.toString() + (next != null ? "-->" + next.toString() : "");
 		}
 	}
 
@@ -97,8 +103,17 @@ public class Graph {
 		if (!mPersonIndex.containsKey(start)) throw new PersonNotFoundException(start);
 		if (!mPersonIndex.containsKey(finish)) throw new PersonNotFoundException(finish);
 
+		// Filter.
+		start = mPersonIndex.get(start);
+		finish = mPersonIndex.get(finish);
+
+		if (!mEdgeIndex.containsKey(start) || !mEdgeIndex.containsKey(finish)) {
+			return null;
+		}
+
 		distances.put(start, 0);
 		for (PersonNode p = mEdgeIndex.get(start); p != null; p = p.next) {
+			prevPerson.put(p.data, start);
 			distances.put(p.data, 1);
 			fringe.insertNode(p.data, 1);
 		}
@@ -109,10 +124,14 @@ public class Graph {
 				break;
 			}
 
+			if (mEdgeIndex.containsKey(top.data))
 			for (PersonNode neighbor = mEdgeIndex.get(top.data); neighbor != null; neighbor = neighbor.next) {
 				if (!distances.containsKey(neighbor.data)) {
+					int newDist = distances.get(top.data) + 1;
 					prevPerson.put(neighbor.data, top.data);
-					distances.put(neighbor.data, distances.get(top.data) + 1);
+					distances.put(neighbor.data, newDist);
+
+					fringe.insertNode(neighbor.data, newDist);
 				} else {
 					int curDist = distances.get(neighbor.data), newDist = distances.get(top.data) + 1;
 					if (newDist < curDist) {
@@ -126,8 +145,10 @@ public class Graph {
 		if (!prevPerson.containsKey(finish)) return null;
 
 		ArrayList<Person> path = new ArrayList<>();
-		for (Person p = finish; p != start; p = prevPerson.get(p))
+		for (Person p = finish; p != start; p = prevPerson.get(p)) {
+			if (p == null) {while (true);}
 			path.add(0, p);
+		}
 		path.add(0, start);
 
 		return path;
