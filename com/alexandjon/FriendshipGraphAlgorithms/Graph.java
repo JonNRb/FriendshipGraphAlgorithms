@@ -120,6 +120,11 @@ public class Graph {
 
 		return null;
 	}
+	
+	public void getAllCliques(String school)
+	{
+		
+	}
 
 	public void printConnections() {
 		for (Person p : mEdgeIndex.keySet()) {
