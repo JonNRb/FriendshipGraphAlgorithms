@@ -1,4 +1,6 @@
 package com.alexandjon.FriendshipGraphAlgorithms;
+
+
 class TestDriver {
 	public static void main(String[] argv) {
 		/*Graph g = new Graph();
@@ -18,7 +20,7 @@ class TestDriver {
 
 		g.printConnections();*/
 
-		Graph.MinHeap<String,Integer> mh = new Graph.MinHeap<>();
+		MinHeap<String,Integer> mh = new MinHeap<>();
 
 		mh.insertNode("jon", 1);
 		mh.insertNode("alex", 2);
