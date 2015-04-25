@@ -1,4 +1,3 @@
-package com.alexandjon.FriendshipGraphAlgorithms;
 import java.util.*;
 import java.lang.*;
 
@@ -7,7 +6,7 @@ public class Graph {
 	////////////////////////////////////////////////////////////////////////////////
 	public static class Person {
 		String name;
-		String school;
+		String school; // If no school, set to null.
 
 		Person(String name, String school) {
 			this.name = name;
