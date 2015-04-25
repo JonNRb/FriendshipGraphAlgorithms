@@ -1,3 +1,4 @@
+package com.alexandjon.FriendshipGraphAlgorithms;
 import java.util.*;
 import java.lang.*;
 
