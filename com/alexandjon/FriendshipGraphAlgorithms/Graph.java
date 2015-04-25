@@ -65,10 +65,11 @@ public class Graph {
 	}
 
 	public void addPerson(Person person) {
-		if (mPersonNameIndex.containsKey(person.name) && mPersonNameIndex.get(person.name).equals(person)) return;
+		if (mPersonNameIndex.containsKey(person.name.toLowerCase()) && mPersonNameIndex.get(person.name.toLowerCase()).equals(person)) return;
 
+		mEdgeIndex.put(person, null);
 		mPersonIndex.put(person, person);
-		mPersonNameIndex.put(person.name, person);
+		mPersonNameIndex.put(person.name.toLowerCase(), person);
 	}
 
 	public void addEdge(Person p1, Person p2) throws PersonNotFoundException {
