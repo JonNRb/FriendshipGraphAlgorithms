@@ -65,10 +65,11 @@ public class Graph {
 	}
 
 	public void addPerson(Person person) {
-		if (mPersonNameIndex.containsKey(person.name) && mPersonNameIndex.get(person.name).equals(person)) return;
+		if (mPersonNameIndex.containsKey(person.name.toLowerCase()) && mPersonNameIndex.get(person.name.toLowerCase()).equals(person)) return;
 
+		mEdgeIndex.put(person, null);
 		mPersonIndex.put(person, person);
-		mPersonNameIndex.put(person.name, person);
+		mPersonNameIndex.put(person.name.toLowerCase(), person);
 	}
 
 	public void addEdge(Person p1, Person p2) throws PersonNotFoundException {
@@ -88,7 +89,7 @@ public class Graph {
 		} else return null;
 	}
 
-	List<Person> shortestPath(Person start, Person finish) throws PersonNotFoundException {
+	ArrayList<Person> shortestPath(Person start, Person finish) throws PersonNotFoundException {
 		MinHeap<Person,Integer> fringe = new MinHeap<>();
 		HashMap<Person,Integer> distances = new HashMap<>();
 		HashMap<Person,Person> prevPerson = new HashMap<>();
@@ -104,21 +105,32 @@ public class Graph {
 		
 		MinHeap.HeapNode<Person,Integer> top;
 		while ((top = fringe.pop()) != null) {
+			if (top.data == finish) {
+				break;
+			}
+
 			for (PersonNode neighbor = mEdgeIndex.get(top.data); neighbor != null; neighbor = neighbor.next) {
 				if (!distances.containsKey(neighbor.data)) {
 					prevPerson.put(neighbor.data, top.data);
-					distances.put(neighbor.data, top.weight + 1);
+					distances.put(neighbor.data, distances.get(top.data) + 1);
 				} else {
-					int curDist = distances.get(neighbor.data),
-					    newDist = top.weight + 1;
+					int curDist = distances.get(neighbor.data), newDist = distances.get(top.data) + 1;
 					if (newDist < curDist) {
-
+						distances.put(neighbor.data, newDist);
+						prevPerson.put(neighbor.data, top.data);
 					}
 				}
 			}
 		}
 
-		return null;
+		if (!prevPerson.containsKey(finish)) return null;
+
+		ArrayList<Person> path = new ArrayList<>();
+		for (Person p = finish; p != start; p = prevPerson.get(p))
+			path.add(0, p);
+		path.add(0, start);
+
+		return path;
 	}
 	
 	public void getAllCliques(String school)

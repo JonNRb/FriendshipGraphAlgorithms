@@ -1,5 +1,8 @@
 package com.alexandjon.FriendshipGraphAlgorithms;
 
+import java.util.*;
+import java.io.*;
+
 
 class TestDriver {
 	public static void main(String[] argv) {
@@ -20,7 +23,7 @@ class TestDriver {
 
 		g.printConnections();*/
 
-		MinHeap<String,Integer> mh = new MinHeap<>();
+		/*MinHeap<String,Integer> mh = new MinHeap<>();
 
 		mh.insertNode("jon", 1);
 		mh.insertNode("alex", 2);
@@ -41,6 +44,16 @@ class TestDriver {
 		mh.pop();
 		mh.printHeap();
 		
-		System.out.println();
+		System.out.println();*/
+
+		try {
+			File f = new File("testgraph.txt");
+			Scanner sc = new Scanner(f);
+
+			Graph g = Friends.makeGraph(sc);
+			g.printConnections();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 }
