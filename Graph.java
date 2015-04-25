@@ -50,7 +50,7 @@ public class Graph {
 	}
 
 	public static class MinHeap<S,T extends Comparable<T>>{
-		public class HeapNode<S,T extends Comparable<T>> {
+		public static class HeapNode<S,T extends Comparable<T>> {
 			S data;
 			T weight;
 
@@ -86,8 +86,10 @@ public class Graph {
 			}
 		}
 
+		public boolean empty() { return heap.size() == 0; }
+
 		public HeapNode<S,T> pop() {
-			if (heap.size() == 0) return null;
+			if (empty()) return null;
 
 			HeapNode<S,T> retVal = heap.get(0);
 			
@@ -164,7 +166,7 @@ public class Graph {
 	}
 
 	List<Person> shortestPath(Person start, Person finish) throws PersonNotFoundException {
-		//BSTN<Person,Integer> fringe = new BSTN<>();
+		MinHeap<Person,Integer> fringe = new MinHeap<>();
 		HashMap<Person,Integer> distances = new HashMap<>();
 		HashMap<Person,Person> prevPerson = new HashMap<>();
 
@@ -174,8 +176,25 @@ public class Graph {
 		distances.put(start, 0);
 		for (PersonNode p = mEdgeIndex.get(start); p != null; p = p.next) {
 			distances.put(p.data, 1);
-			//fringe.insertNode(p.data, 1);
+			fringe.insertNode(p.data, 1);
 		}
+		
+		MinHeap.HeapNode<Person,Integer> top;
+		while ((top = fringe.pop()) != null) {
+			for (PersonNode neighbor = mEdgeIndex.get(top.data); neighbor != null; neighbor = neighbor.next) {
+				if (!distances.containsKey(neighbor.data)) {
+					prevPerson.put(neighbor.data, top.data);
+					distances.put(neighbor.data, top.weight + 1);
+				} else {
+					int curDist = distances.get(neighbor.data),
+					    newDist = top.weight + 1;
+					if (newDist < curDist) {
+
+					}
+				}
+			}
+		}
+
 		return null;
 	}
 
