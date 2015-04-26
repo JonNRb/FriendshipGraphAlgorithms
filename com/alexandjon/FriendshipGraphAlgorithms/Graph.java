@@ -57,6 +57,81 @@ public class Graph {
 			super("Person \"" + p.name + "\" that goes to \"" + p.school + "\" not found.");
 		}
 	}
+
+	private abstract class Traverser {
+		private boolean mEndTraversal;
+		public void endTraversal() {
+			mEndTraversal = true;
+		}
+
+		abstract boolean onVisitForward(Person current, Person prev);
+		abstract boolean onVisitBackward(Person current, Person prev);
+
+		public void dfs(Person start) throws PersonNotFoundException {
+			mEndTraversal = false;
+			dfs(start, null);
+		}
+
+		public void dfs(Person start, Person prev) throws PersonNotFoundException {
+			if (start == null) return;
+			if (!mPersonIndex.containsKey(start)) throw new PersonNotFoundException(start);
+
+			if (prev == null) onVisitForward(start, null);
+			if (mEndTraversal) return;
+
+			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
+				if (i.data.equals(prev)) continue;
+
+				if (onVisitForward(i.data, start)) continue;
+				if (mEndTraversal) return;
+
+				dfs(i.data, start);
+
+				if (onVisitBackward(start, i.data)) break;
+				if (mEndTraversal) return;
+			}
+
+			return;
+		}
+
+		public void bfs(Person start) throws PersonNotFoundException {
+			mEndTraversal = false;
+			bfs(start, null);
+		}
+
+		private void bfs(Person start, Person prev) throws PersonNotFoundException {
+			if (start == null) return;
+			if (!mPersonIndex.containsKey(start)) throw new PersonNotFoundException(start);
+
+			if (prev == null) onVisitForward(start, null);
+			if (mEndTraversal) return;
+
+			HashMap<Person,Boolean> retVals = new HashMap<>();
+
+			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
+				if (i.data.equals(prev)) continue;
+				retVals.put(i.data, onVisitForward(i.data, start));
+				if (mEndTraversal) return;
+			}
+
+			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
+				if (i.data.equals(prev)) continue;
+
+				if (retVals.get(i.data)) continue;
+
+				bfs(i.data, start);
+				if (mEndTraversal) return;
+			}
+
+			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
+				if (i.data.equals(prev)) continue;
+				if (onVisitBackward(start, i.data)) break;
+				if (mEndTraversal) return;
+			}
+
+			return;
+		}
+	}
 	////////////////////////////////////////////////////////////////////////////////
 
 	
@@ -79,8 +154,9 @@ public class Graph {
 	}
 
 	public void addEdge(Person p1, Person p2) throws PersonNotFoundException {
+		if (p1 == null || p2 == null) return;
 		if (!mPersonIndex.containsKey(p1)) {
-			throw new PersonNotFoundException("Person \"" + p1.name + "\" that goes to \"" + p1.school + "\" not found.");
+			throw new PersonNotFoundException(p1);
 		} else if (!mPersonIndex.containsKey(p2)) {
 			throw new PersonNotFoundException(p2);
 		}
@@ -90,8 +166,8 @@ public class Graph {
 	}
 
 	public Person nameQuery(String name) {
-		if (mPersonNameIndex.containsKey(name)) {
-			return mPersonNameIndex.get(name);
+		if (mPersonNameIndex.containsKey(name.toLowerCase())) {
+			return mPersonNameIndex.get(name.toLowerCase());
 		} else return null;
 	}
 
@@ -153,6 +229,90 @@ public class Graph {
 
 		return path;
 	}
+
+	public Set<Person> getConnectors() {
+		final HashMap<Person,Person> retVal = new HashMap<>();
+
+		final HashMap<Person,Integer> dfsNum = new HashMap<>();
+		final HashMap<Person,Integer> back = new HashMap<>();
+
+		final HashMap<Person,Person> visited = new HashMap<>();
+
+		ArrayList<Person> people = new ArrayList<Person>(mPersonIndex.keySet());
+
+		while (people.size() != 0 && visited.containsKey(people.get(0))) people.remove(0);
+		if (people.size() == 0) return retVal.keySet();
+		final Person start = nameQuery("A"); //people.remove(0);
+
+		Traverser t = new Traverser() {
+			int dfsNumCounter = 0;
+
+			boolean onVisitForward(Person cur, Person prev) {
+				if (prev != null && cur.equals(start)) return true;
+
+				System.out.println("---> " + cur.toString() + " from " + (prev != null ? prev.toString() : null));
+
+				dfsNum.put(cur, ++dfsNumCounter);
+				if (!visited.containsKey(cur)) {
+					back.put(cur, dfsNumCounter);
+				} else {
+					back.put(cur, Math.min(back.get(cur), dfsNum.get(prev)));
+					return true;
+				}
+
+				visited.put(cur, cur);
+				return false;
+			}
+
+			boolean onVisitBackward(Person cur, Person prev) {
+
+				System.out.println("<--- " + cur.toString() + " from " + (prev != null ? prev.toString() : null));
+
+				if (dfsNum.get(cur) > back.get(prev))
+					back.put(prev, Math.min(back.get(prev), back.get(cur)));
+
+				if (dfsNum.get(cur) <= back.get(prev) && !cur.equals(start)) {
+					retVal.put(cur, cur);
+				}
+
+
+				return false;
+			}
+		};
+
+		try {
+			t.dfs(start);
+		} catch (PersonNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		return retVal.keySet();
+	}
+
+	public void testDfs(Person start) {
+		final HashMap<Person,Person> visited = new HashMap<>();
+
+		Traverser t = new Traverser() {
+			boolean onVisitForward(Person p, Person prev) {
+				if (visited.containsKey(p)) return true;
+				System.out.println("---> " + p.toString() + " from " + (prev != null ? prev.toString() : null));
+				visited.put(p, p);
+				return false;
+			}
+
+			boolean onVisitBackward(Person p, Person prev) {
+				System.out.println("<--- " + p.toString() + " from " + (prev != null ? prev.toString() : null));
+				return false;
+			}
+		};
+
+		System.out.println("TESTING DFS");
+		try {
+			t.dfs(start);
+		} catch (PersonNotFoundException e) {
+			e.printStackTrace();
+		}
+	} 
 
 	public void printConnections() {
 		for (Person p : mEdgeIndex.keySet()) {
