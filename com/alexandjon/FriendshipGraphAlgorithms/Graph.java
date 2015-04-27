@@ -135,7 +135,7 @@ public class Graph {
 	
 	public void getAllCliques(String school)
 	{
-		
+		while(mEdgeIndex)
 	}
 
 	public void printConnections() {
