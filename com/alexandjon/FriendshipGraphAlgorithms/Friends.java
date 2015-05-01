@@ -1,5 +1,6 @@
 package com.alexandjon.FriendshipGraphAlgorithms;
 
+import java.lang.*;
 import java.util.*;
 import java.io.*;
 
@@ -14,8 +15,8 @@ public class Friends {
 			String[] line = raw.split("\\|");
 
 			if (line.length == 3 || (line.length == 2 && line[1].equals("n"))) {
-				final String name = line[0];
-				final String school = (line.length == 2 ? null : line[2]);
+				final String name = line[0].toLowerCase();
+				final String school = (line.length == 2 ? null : line[2].toLowerCase());
 				Graph.Person p = new Graph.Person(name, school);
 				System.out.println("Adding " + p.toString());
 				retVal.addPerson(p);

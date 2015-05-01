@@ -1,10 +1,11 @@
 package com.alexandjon.FriendshipGraphAlgorithms;
 
+import java.lang.*;
 import java.util.*;
 import java.io.*;
 
 
-class TestDriver {
+public class TestDriver {
 	public static void main(String[] argv) {
 		/*Graph g = new Graph();
 
@@ -50,9 +51,32 @@ class TestDriver {
 			File f = new File("testgraph.txt");
 			Scanner sc = new Scanner(f);
 
-			Graph g = Friends.makeGraph(sc);
+			Graph g = new Graph(); //Friends.makeGraph(sc);
+
+			g.addPerson(new Graph.Person("A", null));
+			g.addPerson(new Graph.Person("B", null));
+			g.addPerson(new Graph.Person("C", null));
+			g.addPerson(new Graph.Person("D", null));
+			g.addPerson(new Graph.Person("E", null));
+			g.addPerson(new Graph.Person("F", null));
+
+			g.addEdge(g.nameQuery("A"), g.nameQuery("B"));
+			g.addEdge(g.nameQuery("B"), g.nameQuery("C"));
+			g.addEdge(g.nameQuery("B"), g.nameQuery("E"));
+			g.addEdge(g.nameQuery("E"), g.nameQuery("D"));
+			g.addEdge(g.nameQuery("C"), g.nameQuery("D"));
+			g.addEdge(g.nameQuery("D"), g.nameQuery("F"));
+
 			g.printConnections();
+
+			//System.out.println(g.shortestPath(g.nameQuery("samir"), g.nameQuery("nick")));
+
+			//g.testDfs(g.nameQuery("samir"));
+
+			System.out.println(g.getConnectors());
 		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

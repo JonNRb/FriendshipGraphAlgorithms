@@ -1,6 +1,8 @@
 package com.alexandjon.FriendshipGraphAlgorithms;
 
+import java.lang.*;
 import java.util.*;
+import java.io.*;
 
 
 public class MinHeap<S,T extends Comparable<T>>{
@@ -49,6 +51,9 @@ public class MinHeap<S,T extends Comparable<T>>{
 		
 		HeapNode<S,T> last = heap.get(heap.size()-1);
 		heap.remove(heap.size()-1);
+		if (empty()) {
+			return retVal;
+		}
 		heap.set(0, last);
 
 		int pre = 0, cur = pre*2 + 1;
