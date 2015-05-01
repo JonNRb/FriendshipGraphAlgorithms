@@ -251,20 +251,15 @@ public class Graph {
 
 				boolean onVisitForward(Person cur, Person prev) {
 					if (prev == null) {
-						System.out.println(">>>STARTING<<<");
 						dfsNumCounter = 0;
 						start = cur;
 					}
 
-					System.out.print("---> " + cur.toString() + " from " + (prev != null ? prev.toString() : null));
-
 					if (!visited.containsKey(cur)) {
 						dfsNum.put(cur, ++dfsNumCounter);
 						back.put(cur, dfsNumCounter);
-						System.out.println(" (" + dfsNum.get(cur) + "," + back.get(cur) + ")");
 					} else {
 						back.put(prev, Math.min(back.get(prev), dfsNum.get(cur)));
-						System.out.println(" ALREADY VISITED, " + prev.name + " (" + dfsNum.get(prev) + "," + back.get(prev) + ")");
 						return true;
 					}
 
@@ -273,21 +268,11 @@ public class Graph {
 				}
 
 				boolean onVisitBackward(Person cur, Person prev) {
-					System.out.print("<--- " + cur.toString() + " from " + (prev != null ? prev.toString() : null));
-
-					boolean awef = false, awef2 = false;
 					if (dfsNum.get(cur) > back.get(prev)) {
-						awef2 = true;
 						back.put(cur, Math.min(back.get(cur), back.get(prev)));
 					} else if (!cur.equals(start)) {
-						awef = true;
 						retVal.put(cur, cur);
 					}
-
-					System.out.println(" (" + dfsNum.get(cur) + "," + back.get(cur) + ")");
-
-					if (awef) System.out.println("CONNECTOR FOUND: " + cur.name);
-					if (awef2) System.out.println("dfsNum.get(" + cur.name + ") > back.get(" + prev.name + ")");
 
 					return false;
 				}
@@ -309,10 +294,6 @@ public class Graph {
 			}
 
 		} while (people.size() > 0);
-
-		for (Person p : dfsNum.keySet()) {
-			System.out.println(p.name + "\t :" + dfsNum.get(p) + " , " + back.get(p));
-		}
 
 		return retVal.keySet();
 	}
