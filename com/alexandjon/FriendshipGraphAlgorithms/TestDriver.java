@@ -69,13 +69,14 @@ public class TestDriver {
 
 			g.printConnections();
 
-			System.out.println("-------------------------------------");
-
 			//System.out.println(g.shortestPath(g.nameQuery("samir"), g.nameQuery("nick")));
 
 			//g.testDfs(g.nameQuery("samir"));
 
-			System.out.println(g.getConnectors());
+			//Algorithms.testDfs(g, g.nameQuery("jane"));
+
+			System.out.println(Algorithms.shortestPath(g, g.nameQuery("heather"), g.nameQuery("tom")));
+
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
