@@ -10,10 +10,23 @@ public class Graph {
 	public static class Person {
 		String name;
 		String school; // If no school, set to null.
+		int vnum;
 
 		Person(String name, String school) {
 			this.name = name;
 			this.school = school;
+		}
+
+		Person(String name, String school, int vnum) {
+			this.name = name;
+			this.school = school;
+			this.vnum = vnum;
+		}
+
+		Person(Person person) {
+			this.name = person.name;
+			this.school = person.school;
+			this.vnum = vnum;
 		}
 
 		@Override
@@ -58,111 +71,69 @@ public class Graph {
 		}
 	}
 
-	private abstract class Traverser {
-		private boolean mEndTraversal;
-		public void endTraversal() {
-			mEndTraversal = true;
+	@SuppressWarnings("serial")
+	public static class DuplicatePersonException extends Exception {
+		public DuplicatePersonException() {
+			super();
 		}
-
-		abstract boolean onVisitForward(Person current, Person prev);
-		abstract boolean onVisitBackward(Person current, Person prev);
-
-		public void dfs(Person start) throws PersonNotFoundException {
-			mEndTraversal = false;
-			dfs(start, null);
+		public DuplicatePersonException(String s) {
+			super(s);
 		}
-
-		public void dfs(Person start, Person prev) throws PersonNotFoundException {
-			if (start == null) return;
-			if (!mPersonIndex.containsKey(start)) throw new PersonNotFoundException(start);
-
-			if (prev == null) onVisitForward(start, null);
-			if (mEndTraversal) return;
-
-			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
-				//if (i.data.equals(prev)) continue;
-
-				if (onVisitForward(i.data, start)) continue;
-				if (mEndTraversal) return;
-
-				dfs(i.data, start);
-
-				if (onVisitBackward(start, i.data)) break;
-				if (mEndTraversal) return;
-			}
-
-			return;
-		}
-
-		public void bfs(Person start) throws PersonNotFoundException {
-			mEndTraversal = false;
-			bfs(start, null);
-		}
-
-		private void bfs(Person start, Person prev) throws PersonNotFoundException {
-			if (start == null) return;
-			if (!mPersonIndex.containsKey(start)) throw new PersonNotFoundException(start);
-
-			if (prev == null) onVisitForward(start, null);
-			if (mEndTraversal) return;
-
-			HashMap<Person,Boolean> retVals = new HashMap<>();
-
-			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
-				//if (i.data.equals(prev)) continue;
-				retVals.put(i.data, onVisitForward(i.data, start));
-				if (mEndTraversal) return;
-			}
-
-			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
-				//if (i.data.equals(prev)) continue;
-
-				if (retVals.get(i.data)) continue;
-
-				bfs(i.data, start);
-				if (mEndTraversal) return;
-			}
-
-			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
-				//if (i.data.equals(prev)) continue;
-				if (onVisitBackward(start, i.data)) break;
-				if (mEndTraversal) return;
-			}
-
-			return;
+		public DuplicatePersonException(Person p) {
+			super("Person \"" + p.name + "\" that goes to \"" + p.school + "\" already exists.");
 		}
 	}
 	////////////////////////////////////////////////////////////////////////////////
 
+	private ArrayList<Person> mVertices;
+	private ArrayList<PersonNode> mEdges;
 	
-	private HashMap<Person,PersonNode> mEdgeIndex;
-	private HashMap<Person,Person> mPersonIndex;
 	private HashMap<String,Person> mPersonNameIndex;
+	private HashMap<String,PersonNode> mSchoolIndex;
 
 	public Graph() {
-		mEdgeIndex = new HashMap<>();
-		mPersonIndex = new HashMap<>();
+		mVertices = new ArrayList<>();
+		mEdges = new ArrayList<>();
+
 		mPersonNameIndex = new HashMap<>();
+		mSchoolIndex = new HashMap<>();
 	}
 
-	public void addPerson(Person person) {
-		if (mPersonNameIndex.containsKey(person.name.toLowerCase()) && mPersonNameIndex.get(person.name.toLowerCase()).equals(person)) return;
+	public void addPerson(Person person) throws DuplicatePersonException {
+		if (mPersonNameIndex.containsKey(person.name.toLowerCase())) throw new DuplicatePersonException(person);
 
-		mEdgeIndex.put(person, null);
-		mPersonIndex.put(person, person);
-		mPersonNameIndex.put(person.name.toLowerCase(), person);
+		Person scrub = new Person(person);
+		scrub.vnum = mVertices.size();
+
+		mVertices.add(scrub);
+		mEdges.add(null);
+
+		mPersonNameIndex.put(scrub.name.toLowerCase(), scrub);
+
+		if (scrub.school != null) {
+			mSchoolIndex.put(
+				scrub.school.toLowerCase(),
+				new PersonNode(
+					scrub,
+				(mSchoolIndex.containsKey(scrub.school.toLowerCase()) ? 
+						mSchoolIndex.get(scrub.school.toLowerCase()) : null)));
+		}
 	}
 
 	public void addEdge(Person p1, Person p2) throws PersonNotFoundException {
 		if (p1 == null || p2 == null) return;
-		if (!mPersonIndex.containsKey(p1)) {
+		if (!inGraph(p1)) {
 			throw new PersonNotFoundException(p1);
-		} else if (!mPersonIndex.containsKey(p2)) {
+		} else if (!inGraph(p2)) {
 			throw new PersonNotFoundException(p2);
 		}
 
-		mEdgeIndex.put(p1, new PersonNode(p2, (mEdgeIndex.containsKey(p1) ? mEdgeIndex.get(p1) : null)));
-		mEdgeIndex.put(p2, new PersonNode(p1, (mEdgeIndex.containsKey(p2) ? mEdgeIndex.get(p2) : null)));
+		mEdges.set(p1.vnum, new PersonNode(p2, mEdges.get(p1.vnum)));
+		mEdges.set(p2.vnum, new PersonNode(p1, mEdges.get(p2.vnum)));
+	}
+
+	public boolean inGraph(Person p) {
+		return mVertices.get(p.vnum) == p;
 	}
 
 	public Person nameQuery(String name) {
@@ -170,169 +141,31 @@ public class Graph {
 			return mPersonNameIndex.get(name.toLowerCase());
 		} else return null;
 	}
-
-	ArrayList<Person> shortestPath(Person start, Person finish) throws PersonNotFoundException {
-		MinHeap<Person,Integer> fringe = new MinHeap<>();
-		HashMap<Person,Integer> distances = new HashMap<>();
-		HashMap<Person,Person> prevPerson = new HashMap<>();
-
-		if (!mPersonIndex.containsKey(start)) throw new PersonNotFoundException(start);
-		if (!mPersonIndex.containsKey(finish)) throw new PersonNotFoundException(finish);
-
-		// Filter.
-		start = mPersonIndex.get(start);
-		finish = mPersonIndex.get(finish);
-
-		if (!mEdgeIndex.containsKey(start) || !mEdgeIndex.containsKey(finish)) {
-			return null;
-		}
-
-		distances.put(start, 0);
-		for (PersonNode p = mEdgeIndex.get(start); p != null; p = p.next) {
-			prevPerson.put(p.data, start);
-			distances.put(p.data, 1);
-			fringe.insertNode(p.data, 1);
-		}
-		
-		MinHeap.HeapNode<Person,Integer> top;
-		while ((top = fringe.pop()) != null) {
-			if (top.data == finish) {
-				break;
-			}
-
-			if (mEdgeIndex.containsKey(top.data))
-			for (PersonNode neighbor = mEdgeIndex.get(top.data); neighbor != null; neighbor = neighbor.next) {
-				if (!distances.containsKey(neighbor.data)) {
-					int newDist = distances.get(top.data) + 1;
-					prevPerson.put(neighbor.data, top.data);
-					distances.put(neighbor.data, newDist);
-
-					fringe.insertNode(neighbor.data, newDist);
-				} else {
-					int curDist = distances.get(neighbor.data), newDist = distances.get(top.data) + 1;
-					if (newDist < curDist) {
-						distances.put(neighbor.data, newDist);
-						prevPerson.put(neighbor.data, top.data);
-					}
-				}
-			}
-		}
-
-		if (!prevPerson.containsKey(finish)) return null;
-
-		ArrayList<Person> path = new ArrayList<>();
-		for (Person p = finish; p != start; p = prevPerson.get(p)) {
-			if (p == null) {while (true);}
-			path.add(0, p);
-		}
-		path.add(0, start);
-
-		return path;
-	}
-
-	public void getAllCliques(String school)
+	
+	public PersonNode schoolQuery(String school)
 	{
-		return;
+		if(mSchoolIndex.containsKey(school.toLowerCase()))
+		{
+			return mSchoolIndex.get(school.toLowerCase());
+		}
+		else
+			return null;
+	}
+	PersonNode getEdge(int vnum) {
+		return mEdges.get(vnum);
 	}
 	
-	public Set<Person> getConnectors() {
-		final HashMap<Person,Person> retVal = new HashMap<>();
-
-		final HashMap<Person,Integer> dfsNum = new HashMap<>();
-		final HashMap<Person,Integer> back = new HashMap<>();
-
-		final HashMap<Person,Person> visited = new HashMap<>();
-
-		final ArrayList<Person> people = new ArrayList<Person>(mPersonIndex.keySet());
-
-		do {
-			while (people.size() != 0 && visited.containsKey(people.get(0))) people.remove(0);
-			if (people.size() == 0) break;
-			final Person start = people.remove(0);
-
-			Traverser t = new Traverser() {
-				int dfsNumCounter = 0;
-				Person start = null;
-
-				boolean onVisitForward(Person cur, Person prev) {
-					if (prev == null) {
-						dfsNumCounter = 0;
-						start = cur;
-					}
-
-					if (!visited.containsKey(cur)) {
-						dfsNum.put(cur, ++dfsNumCounter);
-						back.put(cur, dfsNumCounter);
-					} else {
-						back.put(prev, Math.min(back.get(prev), dfsNum.get(cur)));
-						return true;
-					}
-
-					visited.put(cur, cur);
-					return false;
-				}
-
-				boolean onVisitBackward(Person cur, Person prev) {
-					if (dfsNum.get(cur) > back.get(prev)) {
-						back.put(cur, Math.min(back.get(cur), back.get(prev)));
-					} else if (!cur.equals(start)) {
-						retVal.put(cur, cur);
-					}
-
-					return false;
-				}
-			};
-
-			try {
-				t.dfs(start);
-				
-				PersonNode neighbor = mEdgeIndex.get(start);
-				if (neighbor != null) {
-					visited.clear();
-					dfsNum.clear();
-					back.clear();
-					
-					t.dfs(neighbor.data);
-				}
-			} catch (PersonNotFoundException e) {
-				e.printStackTrace();
-			}
-
-		} while (people.size() > 0);
-
-		return retVal.keySet();
+	Person getVertex(int vnum) {
+		return mVertices.get(vnum);
 	}
 
-	public void testDfs(Person start) {
-		final HashMap<Person,Person> visited = new HashMap<>();
-
-		Traverser t = new Traverser() {
-			boolean onVisitForward(Person p, Person prev) {
-				if (visited.containsKey(p)) return true;
-				System.out.println("---> " + p.toString() + " from " + (prev != null ? prev.toString() : null));
-				visited.put(p, p);
-				return false;
-			}
-
-			boolean onVisitBackward(Person p, Person prev) {
-				System.out.println("<--- " + p.toString() + " from " + (prev != null ? prev.toString() : null));
-				return false;
-			}
-		};
-
-		System.out.println("TESTING DFS");
-		try {
-			t.dfs(start);
-		} catch (PersonNotFoundException e) {
-			e.printStackTrace();
-		}
-	} 
+	int size() { return mVertices.size(); }
 
 	public void printConnections() {
-		for (Person p : mEdgeIndex.keySet()) {
+		for (Person p : mVertices) {
 			System.out.print(p.name);
 
-			PersonNode root = mEdgeIndex.get(p);
+			PersonNode root = mEdges.get(p.vnum);
 			if (root != null) {
 				System.out.print(":\t( ");
 				while (root != null) {

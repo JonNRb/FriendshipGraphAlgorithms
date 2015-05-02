@@ -19,7 +19,11 @@ public class Friends {
 				final String school = (line.length == 2 ? null : line[2].toLowerCase());
 				Graph.Person p = new Graph.Person(name, school);
 				System.out.println("Adding " + p.toString());
-				retVal.addPerson(p);
+				try {
+					retVal.addPerson(p);
+				} catch (Graph.DuplicatePersonException e) {
+					
+				}
 			} else if (line.length == 2) {
 				try {
 					final Graph.Person p1 = retVal.nameQuery(line[0]);

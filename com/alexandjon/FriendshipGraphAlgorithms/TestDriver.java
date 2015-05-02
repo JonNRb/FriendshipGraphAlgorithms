@@ -67,15 +67,20 @@ public class TestDriver {
 			//g.addEdge(g.nameQuery("C"), g.nameQuery("D"));
 			//g.addEdge(g.nameQuery("F"), g.nameQuery("D"));
 
-			g.printConnections();
-
-			System.out.println("-------------------------------------");
+			//g.printConnections();
 
 			//System.out.println(g.shortestPath(g.nameQuery("samir"), g.nameQuery("nick")));
 
 			//g.testDfs(g.nameQuery("samir"));
 
-			System.out.println(g.getConnectors());
+			//Algorithms.testDfs(g, g.nameQuery("jane"));
+
+			//System.out.println(Algorithms.shortestPath(g, g.nameQuery("heather"), g.nameQuery("tom")));
+			for(Graph i:Algorithms.getAllCliques(g,"rutgers"))
+			{
+				i.printConnections();
+			}
+			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
