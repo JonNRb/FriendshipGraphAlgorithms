@@ -75,7 +75,7 @@ public class TestDriver {
 
 			//Algorithms.testDfs(g, g.nameQuery("jane"));
 
-			System.out.println(Algorithms.shortestPath(g, g.nameQuery("heather"), g.nameQuery("tom")));
+			System.out.println(Algorithms.getConnectors(g));
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

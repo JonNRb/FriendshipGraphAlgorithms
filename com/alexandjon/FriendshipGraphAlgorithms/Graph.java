@@ -153,21 +153,20 @@ public class Graph {
 	int size() { return mVertices.size(); }
 
 	public void printConnections() {
+		System.out.println(size());
+
 		for (Person p : mVertices) {
-			System.out.print(p.name);
+			System.out.println(p.name + "|" + (
+				p.school != null ? "y|" + p.school : "n"
+				));
+		}
 
-			PersonNode root = mEdges.get(p.vnum);
-			if (root != null) {
-				System.out.print(":\t( ");
-				while (root != null) {
-					System.out.print(root.data.toString());
-					if (root.next != null) System.out.print(" , ");
-					root = root.next;
+		for (Person p : mVertices) {
+			for (PersonNode c = mEdges.get(p.vnum); c != null; c = c.next) {
+				if (c.data.vnum > p.vnum) {
+					System.out.println(p.name + "|" + c.data.name);
 				}
-				System.out.print(" )");
 			}
-
-			System.out.println();
 		}
 	}
 }

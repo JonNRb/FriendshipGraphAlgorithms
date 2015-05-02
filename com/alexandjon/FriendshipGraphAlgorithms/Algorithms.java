@@ -9,17 +9,17 @@ public class Algorithms {
 	public static Set<Graph.Person> getConnectors(Graph graph) {
 		final HashMap<Graph.Person,Graph.Person> retVal = new HashMap<>();
 
-		final ArrayList<Integer> dfsNum = new ArrayList<>(graph.size());
-		final ArrayList<Integer> back = new ArrayList<>(graph.size());
+		final int[] dfsNum = new int[graph.size()];
+		final int[] back = new int[graph.size()];
 
-		final ArrayList<Boolean> visited = new ArrayList<>(graph.size());
+		final boolean[] visited = new boolean[graph.size()];
 
 		HashMap<Graph.Person,Graph.Person> people = new HashMap<>(graph.size());
 		for (int i = 0; i < graph.size(); i++) people.put(graph.getVertex(i), graph.getVertex(i));
 
 		do {
 			int startVnum = 0;
-			while (startVnum < graph.size() && (visited.get(startVnum) || people.containsKey(graph.getVertex(startVnum)))) {
+			while (startVnum < graph.size() && (visited[startVnum] || !people.containsKey(graph.getVertex(startVnum)))) {
 				if (people.containsKey(graph.getVertex(startVnum))) people.remove(graph.getVertex(startVnum));
 				startVnum++;
 			}
@@ -36,21 +36,21 @@ public class Algorithms {
 						start = cur;
 					}
 
-					if (!visited.get(cur.vnum)) {
-						dfsNum.set(cur.vnum, ++dfsNumCounter);
-						back.set(cur.vnum, dfsNumCounter);
+					if (!visited[cur.vnum]) {
+						dfsNum[cur.vnum] = ++dfsNumCounter;
+						back[cur.vnum] = dfsNumCounter;
 					} else {
-						back.set(prev.vnum, Math.min(back.get(prev.vnum), dfsNum.get(cur.vnum)));
+						back[prev.vnum] = Math.min(back[prev.vnum], dfsNum[cur.vnum]);
 						return true;
 					}
 
-					visited.set(cur.vnum, true);
+					visited[cur.vnum] = true;
 					return false;
 				}
 
 				boolean onVisitBackward(Graph.Person cur, Graph.Person prev) {
-					if (dfsNum.get(cur.vnum) > back.get(prev.vnum)) {
-						back.set(cur.vnum, Math.min(back.get(cur.vnum), back.get(prev.vnum)));
+					if (dfsNum[cur.vnum] > back[prev.vnum]) {
+						back[cur.vnum] = Math.min(back[cur.vnum], back[prev.vnum]);
 					} else if (!cur.equals(start)) {
 						retVal.put(cur, cur);
 					}
@@ -64,9 +64,9 @@ public class Algorithms {
 				
 				Graph.PersonNode neighbor = graph.getEdge(start.vnum);
 				if (neighbor != null) {
-					for (int i = 0; i < visited.size(); i++) visited.set(i, false);
-					for (int i = 0; i < dfsNum.size(); i++) dfsNum.set(i, 0);
-					for (int i = 0; i < back.size(); i++) back.set(i, 0);
+					for (int i = 0; i < visited.length; i++) visited[i] = false;
+					for (int i = 0; i < dfsNum.length; i++) dfsNum[i] = 0;
+					for (int i = 0; i < back.length; i++) back[i] = 0;
 					
 					t.dfs(neighbor.data);
 				}
