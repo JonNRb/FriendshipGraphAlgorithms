@@ -229,12 +229,12 @@ public class Graph {
 
 		return path;
 	}
-	
+
 	public void getAllCliques(String school)
 	{
-		while(mEdgeIndex)
+		return;
 	}
-
+	
 	public Set<Person> getConnectors() {
 		final HashMap<Person,Person> retVal = new HashMap<>();
 
