@@ -80,7 +80,7 @@ public class Graph {
 			if (mEndTraversal) return;
 
 			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
-				if (i.data.equals(prev)) continue;
+				//if (i.data.equals(prev)) continue;
 
 				if (onVisitForward(i.data, start)) continue;
 				if (mEndTraversal) return;
@@ -109,13 +109,13 @@ public class Graph {
 			HashMap<Person,Boolean> retVals = new HashMap<>();
 
 			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
-				if (i.data.equals(prev)) continue;
+				//if (i.data.equals(prev)) continue;
 				retVals.put(i.data, onVisitForward(i.data, start));
 				if (mEndTraversal) return;
 			}
 
 			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
-				if (i.data.equals(prev)) continue;
+				//if (i.data.equals(prev)) continue;
 
 				if (retVals.get(i.data)) continue;
 
@@ -124,7 +124,7 @@ public class Graph {
 			}
 
 			for (PersonNode i = mEdgeIndex.get(start); i != null; i = i.next) {
-				if (i.data.equals(prev)) continue;
+				//if (i.data.equals(prev)) continue;
 				if (onVisitBackward(start, i.data)) break;
 				if (mEndTraversal) return;
 			}
@@ -243,53 +243,62 @@ public class Graph {
 
 		final HashMap<Person,Person> visited = new HashMap<>();
 
-		ArrayList<Person> people = new ArrayList<Person>(mPersonIndex.keySet());
+		final ArrayList<Person> people = new ArrayList<Person>(mPersonIndex.keySet());
 
-		while (people.size() != 0 && visited.containsKey(people.get(0))) people.remove(0);
-		if (people.size() == 0) return retVal.keySet();
-		final Person start = nameQuery("A"); //people.remove(0);
+		do {
+			while (people.size() != 0 && visited.containsKey(people.get(0))) people.remove(0);
+			if (people.size() == 0) break;
+			final Person start = people.remove(0);
 
-		Traverser t = new Traverser() {
-			int dfsNumCounter = 0;
+			Traverser t = new Traverser() {
+				int dfsNumCounter = 0;
+				Person start = null;
 
-			boolean onVisitForward(Person cur, Person prev) {
-				if (prev != null && cur.equals(start)) return true;
+				boolean onVisitForward(Person cur, Person prev) {
+					if (prev == null) {
+						dfsNumCounter = 0;
+						start = cur;
+					}
 
-				System.out.println("---> " + cur.toString() + " from " + (prev != null ? prev.toString() : null));
+					if (!visited.containsKey(cur)) {
+						dfsNum.put(cur, ++dfsNumCounter);
+						back.put(cur, dfsNumCounter);
+					} else {
+						back.put(prev, Math.min(back.get(prev), dfsNum.get(cur)));
+						return true;
+					}
 
-				dfsNum.put(cur, ++dfsNumCounter);
-				if (!visited.containsKey(cur)) {
-					back.put(cur, dfsNumCounter);
-				} else {
-					back.put(cur, Math.min(back.get(cur), dfsNum.get(prev)));
-					return true;
+					visited.put(cur, cur);
+					return false;
 				}
 
-				visited.put(cur, cur);
-				return false;
-			}
+				boolean onVisitBackward(Person cur, Person prev) {
+					if (dfsNum.get(cur) > back.get(prev)) {
+						back.put(cur, Math.min(back.get(cur), back.get(prev)));
+					} else if (!cur.equals(start)) {
+						retVal.put(cur, cur);
+					}
 
-			boolean onVisitBackward(Person cur, Person prev) {
-
-				System.out.println("<--- " + cur.toString() + " from " + (prev != null ? prev.toString() : null));
-
-				if (dfsNum.get(cur) > back.get(prev))
-					back.put(prev, Math.min(back.get(prev), back.get(cur)));
-
-				if (dfsNum.get(cur) <= back.get(prev) && !cur.equals(start)) {
-					retVal.put(cur, cur);
+					return false;
 				}
+			};
 
-
-				return false;
+			try {
+				t.dfs(start);
+				
+				PersonNode neighbor = mEdgeIndex.get(start);
+				if (neighbor != null) {
+					visited.clear();
+					dfsNum.clear();
+					back.clear();
+					
+					t.dfs(neighbor.data);
+				}
+			} catch (PersonNotFoundException e) {
+				e.printStackTrace();
 			}
-		};
 
-		try {
-			t.dfs(start);
-		} catch (PersonNotFoundException e) {
-			e.printStackTrace();
-		}
+		} while (people.size() > 0);
 
 		return retVal.keySet();
 	}
