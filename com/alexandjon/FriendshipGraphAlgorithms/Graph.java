@@ -141,11 +141,20 @@ public class Graph {
 			return mPersonNameIndex.get(name.toLowerCase());
 		} else return null;
 	}
-
+	
+	public PersonNode schoolQuery(String school)
+	{
+		if(mSchoolIndex.containsKey(school.toLowerCase()))
+		{
+			return mSchoolIndex.get(school.toLowerCase());
+		}
+		else
+			return null;
+	}
 	PersonNode getEdge(int vnum) {
 		return mEdges.get(vnum);
 	}
-
+	
 	Person getVertex(int vnum) {
 		return mVertices.get(vnum);
 	}

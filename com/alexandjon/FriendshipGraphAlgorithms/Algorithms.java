@@ -4,6 +4,9 @@ import java.lang.*;
 import java.util.*;
 import java.io.*;
 
+import com.alexandjon.FriendshipGraphAlgorithms.Graph.DuplicatePersonException;
+import com.alexandjon.FriendshipGraphAlgorithms.Graph.PersonNotFoundException;
+
 
 public class Algorithms {
 	public static Set<Graph.Person> getConnectors(Graph graph) {
@@ -157,5 +160,67 @@ public class Algorithms {
 		} catch (Graph.PersonNotFoundException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static ArrayList<Graph> getAllCliques(Graph graph, String school)
+	{
+			final boolean[] visited = new boolean[graph.size()];
+			ArrayList <Graph> r = new ArrayList<>();
+			ArrayList <Graph.Person> schoolPeople = new ArrayList<>();
+			
+			for(Graph.PersonNode g = graph.schoolQuery(school);g!=null;g=g.next)
+			{
+				schoolPeople.add(g.data);
+			}
+			
+			while (schoolPeople.size()!=0) {
+				final Graph clique = new Graph();
+				
+				while(schoolPeople.size()>0&&visited[schoolPeople.get(0).vnum])
+				{
+					schoolPeople.remove(0);
+				}
+				
+				if(schoolPeople.size()==0)
+					break;
+				Graph.Person start = schoolPeople.remove(0);
+				
+				Traverser t = new Traverser(graph) {
+					boolean onVisitForward(Graph.Person p, Graph.Person prev) {
+						if (visited[p.vnum]) return true;
+						if(p.school==null||(!p.school.equals(school))) return true;
+						try {
+							clique.addPerson(p);
+						} catch (DuplicatePersonException e) {
+							e.printStackTrace();
+						}
+						try {
+							if(prev!=null)
+								clique.addEdge(clique.nameQuery(p.name),clique.nameQuery(prev.name));
+						} catch (PersonNotFoundException e) {
+							e.printStackTrace();
+						}
+						
+						visited[p.vnum] = true;
+						return false;
+					}
+	
+					boolean onVisitBackward(Graph.Person p, Graph.Person prev) {
+						return false;
+					}
+				};
+				try {
+					t.dfs(start);
+				} catch (PersonNotFoundException e) {
+					
+					e.printStackTrace();
+				}
+				
+			r.add(clique);	
+			}
+			
+			
+			
+			return r;
 	}
 }
