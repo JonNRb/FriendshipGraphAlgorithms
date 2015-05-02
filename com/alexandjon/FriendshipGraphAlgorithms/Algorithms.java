@@ -164,6 +164,7 @@ public class Algorithms {
 	
 	public static ArrayList<Graph> getAllCliques(Graph graph, String school)
 	{
+			final String schoolFin = school;
 			final boolean[] visited = new boolean[graph.size()];
 			ArrayList <Graph> r = new ArrayList<>();
 			ArrayList <Graph.Person> schoolPeople = new ArrayList<>();
@@ -188,7 +189,7 @@ public class Algorithms {
 				Traverser t = new Traverser(graph) {
 					boolean onVisitForward(Graph.Person p, Graph.Person prev) {
 						if (visited[p.vnum]) return true;
-						if(p.school==null||(!p.school.equals(school))) return true;
+						if (p.school==null || (!p.school.equals(schoolFin))) return true;
 						try {
 							clique.addPerson(p);
 						} catch (DuplicatePersonException e) {

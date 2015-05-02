@@ -44,7 +44,7 @@ public class Friends {
 
 	public static void main(String[] args) {
 		Scanner input = new Scanner(System.in);
-		Graph g;
+		Graph g = new Graph();
 
 		// Get input file name.
 		boolean gotFile = false;
@@ -68,7 +68,20 @@ public class Friends {
 			System.out.print("$ ");
 			String choice = input.nextLine();
 			if (choice.equalsIgnoreCase("path")) {
+				System.out.print("Person 1: ");
+				String p1 = input.nextLine();
+				System.out.print("Person 2: ");
+				String p2 = input.nextLine();
 
+				try {
+					ArrayList<Graph.Person> path = Algorithms.shortestPath(g, g.nameQuery(p1), g.nameQuery(p2));
+					for (Graph.Person p : path) {
+						System.out.print(p.toString() + "--");
+					}
+					System.out.println();
+				} catch (Graph.PersonNotFoundException e) {
+					e.printStackTrace();
+				}
 			} else if (choice.equalsIgnoreCase("cliques")) {
 				System.out.print("School: ");
 				String school = input.nextLine();
@@ -78,8 +91,8 @@ public class Friends {
 				}
 				ArrayList<Graph> cliques = Algorithms.getAllCliques(g, school);
 				for (int i = 0; i < cliques.size(); i++) {
-					System.out.println("Clique "+i);
-					g.printConnections();
+					System.out.println("Clique "+(i+1));
+					cliques.get(i).printConnections();
 				}
 			} else if (choice.equalsIgnoreCase("connectors")) {
 				ArrayList<Graph.Person> connectors = new ArrayList<>(Algorithms.getConnectors(g));
@@ -88,7 +101,7 @@ public class Friends {
 				}
 				System.out.println();
 			} else if (choice.equalsIgnoreCase("quit")) {
-
+				quit = true;
 			} else {
 				System.out.println("Didn't quite catch that...");
 			}
